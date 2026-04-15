@@ -4,6 +4,57 @@ class MasterService {
   constructor() {
     this.collection = db.collection('Master_material');
     this.archiveCollection = db.collection('Material_Archive');
+    this.requestTrackingCollection = db.collection('Request_tracking');
+  }
+
+  // Check if request was already processed (idempotency)
+  async checkDuplicateRequest(idempotencyKey) {
+    if (!idempotencyKey) return null;
+    
+    const doc = await this.requestTrackingCollection.doc(idempotencyKey).get();
+    if (doc.exists) {
+      return doc.data().result;
+    }
+    return null;
+  }
+
+  // Store request tracking for idempotency
+  async recordRequest(idempotencyKey, result) {
+    if (!idempotencyKey) return;
+    
+    await this.requestTrackingCollection.doc(idempotencyKey).set({
+      result,
+      timestamp: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hour expiry
+    });
+  }
+
+  // Check for duplicate master data based on unique attributes
+  async checkDuplicateMaster(materialData) {
+    const snapshot = await this.collection
+      .where('class', '==', materialData.class)
+      .where('category', '==', materialData.category)
+      .where('materialName', '==', materialData.materialName)
+      .where('status', '==', 'active')
+      .get();
+
+    if (!snapshot.empty) {
+      // Check if same data already exists
+      for (const doc of snapshot.docs) {
+        const existing = doc.data();
+        if (
+          existing.materialFlow === materialData.materialFlow &&
+          existing.supplierCode === (materialData.supplierCode || '')
+        ) {
+          return {
+            isDuplicate: true,
+            existingId: doc.id,
+            existingData: { id: doc.id, ...existing }
+          };
+        }
+      }
+    }
+    return { isDuplicate: false };
   }
 
   async generateMaterialCode(materialClass) {
@@ -54,7 +105,26 @@ class MasterService {
     return newCode.toString();
   }
 
-  async create(materialData) {
+  async create(materialData, idempotencyKey = null) {
+    // Check if this request was already processed
+    const existingResult = await this.checkDuplicateRequest(idempotencyKey);
+    if (existingResult) {
+      return existingResult;
+    }
+
+    // Check for duplicate master data
+    const duplicateCheck = await this.checkDuplicateMaster(materialData);
+    if (duplicateCheck.isDuplicate) {
+      const result = {
+        id: duplicateCheck.existingId,
+        ...duplicateCheck.existingData,
+        isDuplicate: true,
+        message: 'This master data already exists'
+      };
+      await this.recordRequest(idempotencyKey, result);
+      return result;
+    }
+
     const materialCode = await this.generateMaterialCode(materialData.class);
 
     const masterDoc = {
@@ -63,7 +133,7 @@ class MasterService {
       class: materialData.class,
       category: materialData.category,
       materialName: materialData.materialName,
-      hsnCode: materialData.hsnCode || '',
+      catNo: materialData.catNo || '',
       supplierName: materialData.supplierName || '',
       supplierCode: materialData.supplierCode || '',
       cgst: materialData.cgst || '',
@@ -78,7 +148,12 @@ class MasterService {
     };
 
     const docRef = await this.collection.add(masterDoc);
-    return { id: docRef.id, ...masterDoc };
+    const result = { id: docRef.id, ...masterDoc };
+    
+    // Record this request for idempotency
+    await this.recordRequest(idempotencyKey, result);
+    
+    return result;
   }
 
   async getAll() {

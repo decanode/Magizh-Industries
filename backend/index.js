@@ -19,7 +19,7 @@ const app = express();
 const frontendPath = path.join(__dirname, 'dist');
 
 // JSON parsing for API routes
-app.use('/api', express.json());
+app.use(express.json());
 
 // Serve static frontend files
 app.use(express.static(frontendPath, {

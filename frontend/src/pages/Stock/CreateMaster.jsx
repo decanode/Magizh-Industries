@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dropdown } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
@@ -12,12 +12,17 @@ const CreateMaster = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [generatedMaterialCode, setGeneratedMaterialCode] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [idempotencyKey, setIdempotencyKey] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [submitError, setSubmitError] = useState('');
+  
   const [formData, setFormData] = useState({
     materialFlow: '',
     class: '',
     category: '',
     materialName: '',
-    hsnCode: '',
+    catNo: '',
     supplierName: '',
     supplierCode: '',
     cgst: '',
@@ -33,7 +38,6 @@ const CreateMaster = () => {
     igst: false
   });
 
-  const [hsnError, setHsnError] = useState(false);
   const [supplierCodeError, setSupplierCodeError] = useState(false);
   const [primaryFieldError, setPrimaryFieldError] = useState({
     materialFlow: false,
@@ -45,6 +49,12 @@ const CreateMaster = () => {
   const [showGstError, setShowGstError] = useState(false);
   const [showRequiredError, setShowRequiredError] = useState(false);
   const [showPrimaryFieldError, setShowPrimaryFieldError] = useState(false);
+
+  // Generate idempotency key on component mount
+  useEffect(() => {
+    const key = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    setIdempotencyKey(key);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,15 +83,6 @@ const CreateMaster = () => {
       if (value !== '' && !/^\d*\.?\d*$/.test(value)) {
         return; // Don't update if invalid
       }
-    }
-
-    if (name === 'hsnCode') {
-      // Allow only 8 Digit numeric input for HSN Code
-      if (value !== '' && !/^\d{0,8}$/.test(value)) {
-        return; // Don't update if invalid
-      }
-      // Set error if length exceeds 8
-      setHsnError(value.length > 8);
     }
 
     if (name === 'supplierCode') {
@@ -191,16 +192,24 @@ const CreateMaster = () => {
       return;
     }
 
+    // Prevent double submission
+    if (isSubmitting) {
+      return;
+    }
+
     setShowGstError(false);
     setShowRequiredError(false);
     setShowPrimaryFieldError(false);
+    setSubmitError('');
     
     const submitData = async () => {
+      setIsSubmitting(true);
       try {
         const token = sessionStorage.getItem('token');
         
         if (!token) {
-          alert('Please login to continue');
+          setSubmitError('Please login to continue');
+          setIsSubmitting(false);
           return;
         }
 
@@ -209,32 +218,41 @@ const CreateMaster = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
+            'x-idempotency-key': idempotencyKey // Send idempotency key
           },
           body: JSON.stringify(formData)
         });
 
         const data = await response.json();
 
-        if (response.ok) {
+        if (response.ok || data.isDuplicate) {
           setShowGstError(false);
           setShowRequiredError(false);
           
           // Set the generated material code and show popup
-          setGeneratedMaterialCode(data.materialCode || data.master?.materialCode || '');
+          setGeneratedMaterialCode(data.master?.materialCode || data.materialCode || '');
+          
+          if (data.isDuplicate) {
+            setSuccessMessage('Material already exists. Showing existing record.');
+          } else {
+            setSuccessMessage('Material master created successfully!');
+          }
+          
           setShowSuccessPopup(true);
           
           // Auto-hide popup after 3 seconds
           setTimeout(() => {
             setShowSuccessPopup(false);
+            handleReset();
           }, 3000);
-          
-          handleReset();
         } else {
-          alert(data.message || 'Failed to create material master');
+          setSubmitError(data.message || data.error || 'Failed to create material master');
         }
       } catch (error) {
         console.error('Error creating material master:', error);
-        alert('Failed to create material master. Please try again.');
+        setSubmitError('Failed to create material master. Please check your connection and try again.');
+      } finally {
+        setIsSubmitting(false);
       }
     };
 
@@ -247,7 +265,7 @@ const CreateMaster = () => {
       class: '',
       category: '',
       materialName: '',
-      hsnCode: '',
+      catNo: '',
       supplierName: '',
       supplierCode: '',
       cgst: '',
@@ -264,7 +282,6 @@ const CreateMaster = () => {
       igst: false
     });
 
-    setHsnError(false);
     setSupplierCodeError(false);
     setPrimaryFieldError({
       materialFlow: false,
@@ -276,6 +293,11 @@ const CreateMaster = () => {
     setShowGstError(false);
     setShowRequiredError(false);
     setShowPrimaryFieldError(false);
+    setSubmitError('');
+    
+    // Generate a new idempotency key for the next submission
+    const newKey = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    setIdempotencyKey(newKey);
   };
 
   return (
@@ -344,15 +366,14 @@ const CreateMaster = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="hsnCode">HSN Code</label>
+                  <label htmlFor="catNo">Catalog Number (CatNo)</label>
                   <input
                     type="text"
-                    id="hsnCode"
-                    name="hsnCode"
-                    value={formData.hsnCode}
+                    id="catNo"
+                    name="catNo"
+                    value={formData.catNo}
                     onChange={handleChange}
-                    placeholder="Enter HSN code (max 8 digits)"
-                    className={`${hsnError ? 'error-input' : ''}`}
+                    placeholder="Enter catalog number"
                   />
                 </div>
 
@@ -462,13 +483,14 @@ const CreateMaster = () => {
                 <div className="form-group">
                   <label htmlFor="unit">Unit <span className="required-asterisk">*</span></label>
                   <Dropdown
-                    title={formData.unit ? `${formData.unit} (${formData.unit === 'EA' ? 'Each' : formData.unit === 'KG' ? 'Kilogram' : 'Meter'})` : "Select unit"}
+                    title={formData.unit ? `${formData.unit} (${formData.unit === 'EA' ? 'Each' : formData.unit === 'KG' ? 'Kilogram' : formData.unit === 'M' ? 'Meter' : 'Strip'})` : "Select unit"}
                     onSelect={(value) => handleChange({ target: { name: 'unit', value } })}
                     className="rsuite-dropdown"
                   >
                     <Dropdown.Item eventKey="EA">EA (Each)</Dropdown.Item>
                     <Dropdown.Item eventKey="KG">KG (Kilogram)</Dropdown.Item>
                     <Dropdown.Item eventKey="M">M (Meter)</Dropdown.Item>
+                    <Dropdown.Item eventKey="ST">ST (Strip)</Dropdown.Item>
                   </Dropdown>
                 </div>
               </div>
@@ -494,17 +516,27 @@ const CreateMaster = () => {
                     <span>GST values cannot exceed 28%</span>
                   </div>
                 )}
-                <button type="button" className="btn-reset" onClick={handleReset}>
+                {submitError && (
+                  <div className="submit-error-message" style={{ color: '#d32f2f', padding: '10px', marginBottom: '10px', borderRadius: '4px', backgroundColor: '#ffebee', border: '1px solid #ffcdd2' }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px', display: 'inline' }}>
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>{submitError}</span>
+                  </div>
+                )}
+                <button type="button" className="btn-reset" onClick={handleReset} disabled={isSubmitting}>
                   Reset
                 </button>
-                <button type="submit" className="btn-submit">
-                  Create Material
+                <button type="submit" className="btn-submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Creating...' : 'Create Material'}
                 </button>
               </div>
             </form>
       </div>
       
-      {showSuccessPopup && <StatusMessage message={`Material Master Created ${generatedMaterialCode}`} />}
+      {showSuccessPopup && <StatusMessage message={successMessage || `Material Master Created ${generatedMaterialCode}`} />}
     </div>
   );
 };

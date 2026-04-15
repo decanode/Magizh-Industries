@@ -4,7 +4,7 @@ const MasterSchema = {
   class: '',
   category: '',
   materialName: '',
-  hsnCode: '',
+  catNo: '',
   supplierName: '',
   supplierCode: '',
   cgst: '',

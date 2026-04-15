@@ -126,7 +126,7 @@ const Entry = () => {
                           </div>
                           <div className="en-info-row">
                             <span className="en-label">HSN Code:</span>
-                            <span className="en-value">{material.hsnCode || '-'}</span>
+                            <span className="en-value">{material.catNo || '-'}</span>
                           </div>
                           <div className="en-info-row">
                             <span className="en-label">Cost/Item:</span>
