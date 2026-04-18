@@ -1,17 +1,8 @@
 # Dependencies
 node_modules/
 
-# Build output
-dist/
-dist-ssr/
+# Firebase credentials
+config/serviceAccountKey.json
 
-# Environment variables
 .env
-.env.production
-
-# Logs
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
+package-lock.json

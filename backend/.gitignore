@@ -1,18 +1,9 @@
 # Dependencies
 node_modules/
 
-# Environment variables
-.env
-.env.production
-
 # Firebase credentials
 config/serviceAccountKey.json
-*-firebase-adminsdk-*.json
 
-# Logs
-logs/
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
+.env
+package-lock.json
+logs

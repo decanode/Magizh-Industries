@@ -226,7 +226,7 @@ const ArchivedMaster = () => {
                           </div>
                           <div className="am-info-row">
                             <span className="am-label">HSN Code:</span>
-                            <span className="am-value">{material.hsnCode || '-'}</span>
+                            <span className="am-value">{material.catNo || '-'}</span>
                           </div>
                           <div className="am-info-row">
                             <span className="am-label">Archived:</span>

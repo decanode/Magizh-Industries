@@ -194,7 +194,7 @@ const DeleteMaster = () => {
                           </div>
                           <div className="dm-info-row">
                             <span className="dm-label">HSN Code:</span>
-                            <span className="dm-value">{material.hsnCode || '-'}</span>
+                            <span className="dm-value">{material.catNo || '-'}</span>
                           </div>
                           <div className="dm-info-row">
                             <span className="dm-label">Cost/Item:</span>

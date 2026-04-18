@@ -1,20 +1,8 @@
 # Root dependencies
 node_modules/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
 # Build artifacts
 dist/
 build/
+.env
+package-lock.json

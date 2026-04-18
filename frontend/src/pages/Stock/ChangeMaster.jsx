@@ -23,7 +23,7 @@ const ChangeMaster = () => {
     class: '',
     category: '',
     materialName: '',
-    hsnCode: '',
+    catNo: '',
     supplierName: '',
     supplierCode: '',
     cgst: '',
@@ -39,8 +39,6 @@ const ChangeMaster = () => {
     sgst: false,
     igst: false
   });
-
-  const [hsnError, setHsnError] = useState(false);
   const [supplierCodeError, setSupplierCodeError] = useState(false);
   const [showGstError, setShowGstError] = useState(false);
   const [showNoChanges, setShowNoChanges] = useState(false);
@@ -94,7 +92,7 @@ const ChangeMaster = () => {
       class: material.class || '',
       category: material.category || '',
       materialName: material.materialName || '',
-      hsnCode: material.hsnCode || '',
+      catNo: material.catNo || '',
       supplierName: material.supplierName || '',
       supplierCode: material.supplierCode || '',
       cgst: material.cgst || '',
@@ -134,15 +132,6 @@ const ChangeMaster = () => {
       if (value !== '' && !/^\d*\.?\d*$/.test(value)) {
         return; // Don't update if invalid
       }
-    }
-
-    if (name === 'hsnCode') {
-      // Allow only 8 Digit numeric input for HSN Code
-      if (value !== '' && !/^\d{0,8}$/.test(value)) {
-        return; // Don't update if invalid
-      }
-      // Set error if length exceeds 8
-      setHsnError(value.length > 8);
     }
 
     if (name === 'supplierCode') {
@@ -205,7 +194,7 @@ const ChangeMaster = () => {
       class: '',
       category: '',
       materialName: '',
-      hsnCode: '',
+      catNo: '',
       supplierName: '',
       supplierCode: '',
       cgst: '',
@@ -363,7 +352,7 @@ const ChangeMaster = () => {
                           </div>
                           <div className="cm-info-row">
                             <span className="cm-label">HSN Code:</span>
-                            <span className="cm-value">{material.hsnCode || '-'}</span>
+                            <span className="cm-value">{material.catNo || '-'}</span>
                           </div>
                           <div className="cm-info-row">
                             <span className="cm-label">Cost/Item:</span>
@@ -462,14 +451,13 @@ const ChangeMaster = () => {
 
                     <div className="cm-form-row">
                       <div className="cm-form-group">
-                        <label>HSN Code</label>
+                        <label>Catalog Number (CatNo)</label>
                         <input
                           type="text"
-                          name="hsnCode"
-                          value={formData.hsnCode}
+                          name="catNo"
+                          value={formData.catNo}
                           onChange={handleInputChange}
-                          placeholder="Enter HSN code (max 8 digits)"
-                          className={`${hsnError ? 'cm-error-input' : ''}`}
+                          placeholder="Enter catalog number"
                         />
                       </div>
 
@@ -578,13 +566,14 @@ const ChangeMaster = () => {
                       <div className="cm-form-group">
                         <label>Unit</label>
                         <Dropdown
-                          title={formData.unit ? `${formData.unit} (${formData.unit === 'EA' ? 'Each' : formData.unit === 'KG' ? 'Kilogram' : 'Meter'})` : "Select unit"}
+                          title={formData.unit ? `${formData.unit} (${formData.unit === 'EA' ? 'Each' : formData.unit === 'KG' ? 'Kilogram' : formData.unit === 'M' ? 'Meter' : 'Strip'})` : "Select unit"}
                           onSelect={(value) => handleInputChange({ target: { name: 'unit', value } })}
                           className="rsuite-dropdown"
                         >
                           <Dropdown.Item eventKey="EA">EA (Each)</Dropdown.Item>
                           <Dropdown.Item eventKey="KG">KG (Kilogram)</Dropdown.Item>
                           <Dropdown.Item eventKey="M">M (Meter)</Dropdown.Item>
+                          <Dropdown.Item eventKey="ST">ST (Strip)</Dropdown.Item>
                         </Dropdown>
                       </div>
                     </div>
