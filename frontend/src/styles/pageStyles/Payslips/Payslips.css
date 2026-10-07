@@ -1,0 +1,124 @@
+/* ============================================
+   PAYSLIPS - generate/void panels and row actions
+   ============================================ */
+
+.ps-row-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ps-download-btn {
+  color: #2d3748;
+}
+
+.ps-download-btn:hover {
+  background: #edf2f7;
+}
+
+.ps-panel-row td {
+  background: #f7fafc;
+  padding: 1rem 1.25rem;
+}
+
+.ps-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ps-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #2d3748;
+}
+
+.ps-panel h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  color: #4a5568;
+}
+
+.ps-warning {
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.ps-inputs-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ps-inputs-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.ps-inputs-row input {
+  width: 140px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+}
+
+.ps-lines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.ps-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: #2d3748;
+  padding: 0.3rem 0;
+}
+
+.ps-line input,
+.ps-line textarea {
+  width: 130px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  text-align: right;
+}
+
+.ps-line textarea {
+  width: 100%;
+  text-align: left;
+  resize: vertical;
+}
+
+.ps-line-readonly span {
+  width: 130px;
+  text-align: right;
+  color: #4a5568;
+}
+
+.ps-line-total,
+.ps-line-net {
+  font-weight: 700;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 0.3rem;
+  padding-top: 0.5rem;
+}
+
+.ps-line-total span,
+.ps-line-net span {
+  font-size: 0.95rem;
+}
+
+.ps-line-net {
+  color: #065f46;
+}

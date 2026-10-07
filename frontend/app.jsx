@@ -14,6 +14,11 @@ import Report from './src/pages/Stock/Report.jsx';
 import Dispatch from './src/pages/Stock/Dispatch.jsx';
 import LogTable from './src/pages/Stock/LogTable.jsx';
 import FinalData from './src/pages/Stock/FinalData.jsx';
+import EmployeeList from './src/pages/Employees/EmployeeList.jsx';
+import EmployeeForm from './src/pages/Employees/EmployeeForm.jsx';
+import TimesheetDay from './src/pages/Timesheet/TimesheetDay.jsx';
+import Dashboard from './src/pages/Dashboard/Dashboard.jsx';
+import PayslipList from './src/pages/Payslips/PayslipList.jsx';
 
 // Helper function to decode JWT and get user role
 const getUserRole = () => {
@@ -37,6 +42,15 @@ const ProtectedRoute = ({ children }) => {
 
   if (!token || !userRole) {
     return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+// Admin-only routes. The backend enforces this too, so this only keeps employees off the screen.
+const AdminRoute = ({ children }) => {
+  if (getUserRole() !== 'admin') {
+    return <Navigate to="/home" replace />;
   }
 
   return children;
@@ -176,6 +190,66 @@ function App() {
           element={
             <ProtectedRoute>
               <FinalData isAdmin={isAdmin} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employees"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <EmployeeList isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employees/new"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <EmployeeForm isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employees/:id"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <EmployeeForm isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/timesheet"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <TimesheetDay isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payslips"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <PayslipList isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <Dashboard isAdmin={isAdmin} />
+              </AdminRoute>
             </ProtectedRoute>
           }
         />

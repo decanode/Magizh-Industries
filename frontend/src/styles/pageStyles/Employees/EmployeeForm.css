@@ -1,0 +1,160 @@
+/* ============================================
+   EMPLOYEE FORM - sections, fields and salary rows
+   ============================================ */
+
+.em-form {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.em-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.em-section h3 {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  color: #2d3748;
+}
+
+.em-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.em-section-head h3 {
+  margin-bottom: 0.25rem;
+}
+
+.em-section .em-muted {
+  margin: 0 0 1rem;
+}
+
+.em-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.em-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.em-grid label input,
+.em-grid label select {
+  font-weight: 400;
+}
+
+.em-code-input {
+  font-family: Consolas, 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+.em-value-input {
+  text-align: right;
+  min-width: 90px;
+}
+
+.em-salary-table td {
+  padding: 0.5rem 0.75rem;
+}
+
+.em-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-bottom: 2rem;
+}
+
+.em-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.em-fieldset:disabled .em-section {
+  opacity: 0.6;
+}
+
+.em-form textarea {
+  width: 100%;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+/* "Left the company" banner */
+.em-exit-banner {
+  background: #fffaf0;
+  border-color: #f6cf8b;
+}
+
+.em-exit-banner h3 {
+  color: #975a16;
+}
+
+.em-exit-banner p {
+  margin: 0.25rem 0;
+  font-size: 0.92rem;
+}
+
+/* "Mark as left" trigger + reason box */
+.em-exit-section {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.em-exit-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.em-exit-box label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.em-danger-btn {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+.em-danger-btn:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+@media (max-width: 768px) {
+  .em-content {
+    padding: 5rem 1rem 1.5rem;
+  }
+
+  .em-section {
+    padding: 1rem;
+  }
+}
