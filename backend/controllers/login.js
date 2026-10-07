@@ -6,6 +6,7 @@ const UserService = require('../services/User');
 const loginActivityService = require('../services/loginActivityService');
 const logger = require('../utils/logger');
 const https = require('https');
+const http = require('http');
 
 // Login user with Firebase Authentication
 exports.login = async (req, res) => {
@@ -134,17 +135,30 @@ function verifyPasswordWithFirebase(email, password, apiKey) {
       returnSecureToken: true,
     });
 
-    const options = {
-      hostname: 'identitytoolkit.googleapis.com',
-      path: `/v1/accounts:signInWithPassword?key=${apiKey}`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData),
-      },
+    const headers = {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData),
     };
 
-    const req = https.request(options, (res) => {
+    // Local Auth emulator (FIREBASE_AUTH_EMULATOR_HOST) serves the same REST path over plain HTTP
+    const emulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    const options = emulatorHost
+      ? {
+          hostname: emulatorHost.split(':')[0],
+          port: Number(emulatorHost.split(':')[1]),
+          path: `/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
+          method: 'POST',
+          headers,
+        }
+      : {
+          hostname: 'identitytoolkit.googleapis.com',
+          path: `/v1/accounts:signInWithPassword?key=${apiKey}`,
+          method: 'POST',
+          headers,
+        };
+
+    const transport = emulatorHost ? http : https;
+    const req = transport.request(options, (res) => {
       let data = '';
 
       res.on('data', (chunk) => {

@@ -14,6 +14,9 @@ const masterRoutes = require('./routes/master');
 const archiveRoutes = require('./routes/archive');
 const stockEntryRoutes = require('./routes/stockEntry');
 const forgotPasswordRoutes = require('./routes/forgotPassword');
+const employeeRoutes = require('./routes/employee');
+const timesheetRoutes = require('./routes/timesheet');
+const payslipRoutes = require('./routes/payslip');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const app = express();
 const frontendPath = path.join(__dirname, 'dist');
@@ -40,6 +43,9 @@ app.use('/api/user', userRoutes);
 app.use('/api/master', masterRoutes);
 app.use('/api/archive', archiveRoutes);
 app.use('/api/stock', stockEntryRoutes);
+app.use('/api/employees', employeeRoutes);
+app.use('/api/timesheet', timesheetRoutes);
+app.use('/api/payslips', payslipRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

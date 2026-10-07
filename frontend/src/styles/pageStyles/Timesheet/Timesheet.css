@@ -1,0 +1,134 @@
+/* ============================================
+   TIMESHEET & DASHBOARD - date/month pickers, status pills, stat cards
+   ============================================ */
+
+.ts-date-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.ts-date-label input,
+.ts-year-input,
+.ts-month-select {
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.92rem;
+  background: #ffffff;
+  color: #2d3748;
+}
+
+.ts-year-input {
+  width: 100px;
+}
+
+.ts-saved {
+  background: #d1fae5;
+  color: #065f46;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+
+/* Status pills (Present / Absent / Leave) */
+.ts-status-group {
+  display: inline-flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ts-status-btn {
+  border: none;
+  background: #ffffff;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: #4a5568;
+}
+
+.ts-status-btn + .ts-status-btn {
+  border-left: 1px solid #e2e8f0;
+}
+
+.ts-status-btn.ts-present.active {
+  background: #d1fae5;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.ts-status-btn.ts-absent.active {
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.ts-status-btn.ts-leave.active {
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.ts-ot-input {
+  width: 70px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  text-align: right;
+}
+
+.ts-ot-input:disabled {
+  background: #f7fafc;
+  color: #a0aec0;
+}
+
+.ts-note-input {
+  width: 100%;
+  min-width: 160px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.88rem;
+}
+
+/* Dashboard stat cards */
+.ts-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.9rem;
+}
+
+.ts-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ts-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.ts-stat-label {
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.ts-leave-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #4a5568;
+}

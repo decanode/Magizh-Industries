@@ -1,15 +1,29 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Package, LogOut, Warehouse } from 'lucide-react';
+import { Home, Package, LogOut, Warehouse, Users, CalendarCheck, LayoutDashboard, Receipt } from 'lucide-react';
 import '../styles/componentStyles/Sidebar.css';
+
+// Not every page passes isAdmin, so also read the role from the saved session.
+const isAdminSession = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem('user') || 'null')?.role === 'admin';
+  } catch {
+    return false;
+  }
+};
 
 const Sidebar = ({ isAdmin = false, isExpanded, onToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const showAdminItems = isAdmin || isAdminSession();
 
   const menuItems = [
     { name: 'Home', icon: Home, path: '/home' },
     { name: 'Stock', icon: Package, path: '/stock' },
-  ];
+    { name: 'Employees', icon: Users, path: '/employees', adminOnly: true },
+    { name: 'Timesheet', icon: CalendarCheck, path: '/timesheet', adminOnly: true },
+    { name: 'Payslips', icon: Receipt, path: '/payslips', adminOnly: true },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', adminOnly: true },
+  ].filter((item) => !item.adminOnly || showAdminItems);
 
   const handleNavigation = (path) => {
     navigate(path);
