@@ -17,6 +17,7 @@ exports.createMaster = async (req, res) => {
       category: req.body.category,
       materialName: req.body.materialName,
       catNo: req.body.catNo || '',
+      hsnCode: req.body.hsnCode || '',
       supplierName: req.body.supplierName || '',
       supplierCode: req.body.supplierCode || '',
       cgst: req.body.cgst || '',

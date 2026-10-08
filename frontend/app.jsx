@@ -2,6 +2,19 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState, useEffect } from 'react';
 import AuthPage from './src/pages/Login.jsx';
 import Home from './src/pages/home.jsx';
+import MasterData from './src/pages/MasterData.jsx';
+import EmployeeTime from './src/pages/EmployeeTime.jsx';
+import PartyMaster from './src/pages/Parties/PartyMaster.jsx';
+import PartyList from './src/pages/Parties/PartyList.jsx';
+import PartyForm from './src/pages/Parties/PartyForm.jsx';
+import Sales from './src/pages/Sales/Sales.jsx';
+import SalesOrderList from './src/pages/Sales/SalesOrderList.jsx';
+import SalesOrderForm from './src/pages/Sales/SalesOrderForm.jsx';
+import DeliveryForm from './src/pages/Sales/DeliveryForm.jsx';
+import DeliveryDetail from './src/pages/Sales/DeliveryDetail.jsx';
+import DeliveryList from './src/pages/Sales/DeliveryList.jsx';
+import InvoiceList from './src/pages/Sales/InvoiceList.jsx';
+import InvoiceDetail from './src/pages/Sales/InvoiceDetail.jsx';
 import Stock from './src/pages/Stock.jsx';
 import Master from './src/pages/Stock/Master.jsx';
 import CreateMaster from './src/pages/Stock/CreateMaster.jsx';
@@ -98,6 +111,62 @@ function App() {
           }
         />
         <Route
+          path="/master-data"
+          element={
+            <ProtectedRoute>
+              <MasterData isAdmin={isAdmin} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/master-data/:type"
+          element={
+            <ProtectedRoute>
+              <PartyMaster isAdmin={isAdmin} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/master-data/:type/create"
+          element={
+            <ProtectedRoute>
+              <PartyForm isAdmin={isAdmin} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/master-data/:type/change"
+          element={
+            <ProtectedRoute>
+              <PartyList isAdmin={isAdmin} mode="change" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/master-data/:type/change/:id"
+          element={
+            <ProtectedRoute>
+              <PartyForm isAdmin={isAdmin} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/master-data/:type/archived"
+          element={
+            <ProtectedRoute>
+              <PartyList isAdmin={isAdmin} mode="archived" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/master-data/:type/delete"
+          element={
+            <ProtectedRoute>
+              <PartyList isAdmin={isAdmin} mode="delete" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/stock"
           element={
             <ProtectedRoute>
@@ -190,6 +259,106 @@ function App() {
           element={
             <ProtectedRoute>
               <FinalData isAdmin={isAdmin} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <Sales isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/orders"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <SalesOrderList isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/orders/new"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <SalesOrderForm isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/orders/:id"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <SalesOrderForm isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/orders/:orderId/deliveries/new"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <DeliveryForm isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/deliveries"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <DeliveryList isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/deliveries/:id"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <DeliveryDetail isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/invoices"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <InvoiceList isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sales/invoices/:id"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <InvoiceDetail isAdmin={isAdmin} />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employee-time"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <EmployeeTime isAdmin={isAdmin} />
+              </AdminRoute>
             </ProtectedRoute>
           }
         />

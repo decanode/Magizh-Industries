@@ -4,9 +4,20 @@ import Navbar from '../../components/Navbar';
 import { Pagination } from '../../components/popup';
 import '../../styles/pageStyles/Stock/Entry.css';
 import { useNavigate } from 'react-router-dom';
-import { IndianRupee } from 'lucide-react';
+import { IndianRupee, Search, SquareCheckBig, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 25;
+
+const COLUMNS = [
+  { key: 'materialCode', label: 'Code', numeric: true },
+  { key: 'materialName', label: 'Material Name' },
+  { key: 'materialFlow', label: 'Flow' },
+  { key: 'class', label: 'Class' },
+  { key: 'category', label: 'Category' },
+  { key: 'catNo', label: 'Cat No' },
+  { key: 'unit', label: 'Unit' },
+  { key: 'costPerItem', label: 'Cost / Item', numeric: true, align: 'right' }
+];
 
 const Entry = () => {
   const navigate = useNavigate();
@@ -14,6 +25,8 @@ const Entry = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [classFilter, setClassFilter] = useState('all');
+  const [sort, setSort] = useState({ key: 'materialCode', direction: 'asc' });
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -42,13 +55,33 @@ const Entry = () => {
     }
   };
 
-  const filteredMaterials = materials.filter(material => {
-    const matchesSearch =
-      material.materialCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      material.materialName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || material.materialFlow === filterType;
-    return matchesSearch && matchesFilter;
-  });
+  const classOptions = [...new Set(materials.map((material) => material.class).filter(Boolean))].sort();
+
+  const filteredMaterials = materials
+    .filter(material => {
+      const term = searchTerm.trim().toLowerCase();
+      const matchesSearch = !term || [material.materialCode, material.materialName, material.catNo]
+        .some(value => String(value || '').toLowerCase().includes(term));
+      const matchesFlow = filterType === 'all' || material.materialFlow === filterType;
+      const matchesClass = classFilter === 'all' || material.class === classFilter;
+      return matchesSearch && matchesFlow && matchesClass;
+    })
+    .sort((a, b) => {
+      const column = COLUMNS.find(col => col.key === sort.key);
+      const left = a[sort.key] ?? '';
+      const right = b[sort.key] ?? '';
+      const result = column?.numeric
+        ? (parseFloat(left) || 0) - (parseFloat(right) || 0)
+        : String(left).localeCompare(String(right), undefined, { sensitivity: 'base' });
+      return sort.direction === 'asc' ? result : -result;
+    });
+
+  const handleSort = (key) => {
+    setSort(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
 
   const totalPages = Math.ceil(filteredMaterials.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -56,7 +89,7 @@ const Entry = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterType]);
+  }, [searchTerm, filterType, classFilter, sort]);
 
   const handleSelect = (material) => {
     navigate('/stock/entry-stock', { state: { material } });
@@ -71,13 +104,10 @@ const Entry = () => {
           <div className="en-main-panel">
             <div className="en-filter-bar">
               <div className="en-search-box">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
+                <Search size={20} />
                 <input
                   type="text"
-                  placeholder="Search by Material Code or Name"
+                  placeholder="Search by Material Code, Name or Cat No"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -88,7 +118,25 @@ const Entry = () => {
                 <button className={`en-tab ${filterType === 'BOM' ? 'en-tab-active' : ''}`} onClick={() => setFilterType('BOM')}>BOM</button>
                 <button className={`en-tab ${filterType === 'FIN' ? 'en-tab-active' : ''}`} onClick={() => setFilterType('FIN')}>FIN</button>
               </div>
+
+              <select
+                className="en-class-select"
+                value={classFilter}
+                onChange={(e) => setClassFilter(e.target.value)}
+                aria-label="Filter by class"
+              >
+                <option value="all">All classes</option>
+                {classOptions.map(cls => (
+                  <option key={cls} value={cls}>Class {cls}</option>
+                ))}
+              </select>
             </div>
+
+            {!loading && (
+              <div className="en-result-count">
+                Showing {filteredMaterials.length === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, filteredMaterials.length)} of {filteredMaterials.length} materials
+              </div>
+            )}
 
             {loading ? (
               <div className="en-loading">
@@ -107,48 +155,60 @@ const Entry = () => {
               </div>
             ) : (
               <>
-                <div className="en-grid">
-                  {paginatedMaterials.map((material) => (
-                    <div key={material.id} className="en-card">
-                      <div className="en-card-header">
-                        <span className="en-code-badge">{material.materialCode || 'N/A'}</span>
-                        <span className={`en-flow-badge en-flow-${material.materialFlow?.toLowerCase()}`}>
-                          {material.materialFlow}
-                        </span>
-                      </div>
-
-                      <div className="en-card-body">
-                        <h3 className="en-material-name">{material.materialName}</h3>
-                        <div className="en-info-list">
-                          <div className="en-info-row">
-                            <span className="en-label">Category:</span>
-                            <span className="en-value">{material.category || '-'}</span>
-                          </div>
-                          <div className="en-info-row">
-                            <span className="en-label">HSN Code:</span>
-                            <span className="en-value">{material.catNo || '-'}</span>
-                          </div>
-                          <div className="en-info-row">
-                            <span className="en-label">Cost/Item:</span>
-                            <span className="en-value en-price">
-                              <IndianRupee size={15} />
-                              {material.costPerItem || '0'}
+                <div className="en-table-wrap">
+                  <table className="en-table">
+                    <thead>
+                      <tr>
+                        {COLUMNS.map(column => {
+                          const active = sort.key === column.key;
+                          const SortIcon = !active ? ChevronsUpDown : sort.direction === 'asc' ? ArrowUp : ArrowDown;
+                          return (
+                            <th
+                              key={column.key}
+                              className={`en-th-sortable ${active ? 'en-th-active' : ''} ${column.align === 'right' ? 'en-right' : ''}`}
+                              onClick={() => handleSort(column.key)}
+                              aria-sort={active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                            >
+                              <span>{column.label}</span>
+                              <SortIcon size={14} />
+                            </th>
+                          );
+                        })}
+                        <th className="en-th-action"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedMaterials.map((material) => (
+                        <tr key={material.id} onClick={() => handleSelect(material)}>
+                          <td><span className="en-code-pill">{material.materialCode || 'N/A'}</span></td>
+                          <td className="en-td-name">{material.materialName}</td>
+                          <td>
+                            <span className={`en-flow-badge en-flow-${material.materialFlow?.toLowerCase()}`}>
+                              {material.materialFlow}
                             </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="en-card-footer">
-                        <button className="en-select-btn" onClick={() => handleSelect(material)}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 11 12 14 22 4"></polyline>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                          </svg>
-                          Select for Entry
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                          </td>
+                          <td>{material.class || '-'}</td>
+                          <td>{material.category || '-'}</td>
+                          <td>{material.catNo || '-'}</td>
+                          <td>{material.unit || '-'}</td>
+                          <td className="en-right en-td-cost">
+                            <IndianRupee size={13} />
+                            {material.costPerItem || '0'}
+                          </td>
+                          <td className="en-td-action">
+                            <button
+                              className="en-row-select-btn"
+                              onClick={(e) => { e.stopPropagation(); handleSelect(material); }}
+                              title="Select for entry"
+                            >
+                              <SquareCheckBig size={15} />
+                              Select
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
                 <Pagination

@@ -3,17 +3,32 @@ import Sidebar from '../../components/Sidebar';
 import Navbar from '../../components/Navbar';
 import { StatusMessage, Pagination } from '../../components/popup';
 import '../../styles/pageStyles/Stock/ChangeMaster.css';
-import { IndianRupee } from 'lucide-react';
+import { IndianRupee, Search, Pencil, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react';
 import { Dropdown } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 25;
+
+// Column definitions for the list view. `sortValue` decides how a column orders; numeric ones compare as numbers.
+const COLUMNS = [
+  { key: 'materialCode', label: 'Code', numeric: true },
+  { key: 'materialName', label: 'Material Name' },
+  { key: 'materialFlow', label: 'Flow' },
+  { key: 'class', label: 'Class' },
+  { key: 'category', label: 'Category' },
+  { key: 'catNo', label: 'Cat No' },
+  { key: 'supplierName', label: 'Supplier' },
+  { key: 'unit', label: 'Unit' },
+  { key: 'costPerItem', label: 'Cost / Item', numeric: true, align: 'right' }
+];
 
 const ChangeMaster = () => {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [classFilter, setClassFilter] = useState('all');
+  const [sort, setSort] = useState({ key: 'materialCode', direction: 'asc' });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
@@ -24,6 +39,7 @@ const ChangeMaster = () => {
     category: '',
     materialName: '',
     catNo: '',
+    hsnCode: '',
     supplierName: '',
     supplierCode: '',
     cgst: '',
@@ -69,13 +85,39 @@ const ChangeMaster = () => {
     }
   };
 
-  const filteredMaterials = materials.filter(material => {
-    const matchesSearch =
-      material.materialCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      material.materialName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || material.materialFlow === filterType;
-    return matchesSearch && matchesFilter;
-  });
+  const classOptions = [...new Set(materials.map((material) => material.class).filter(Boolean))].sort();
+
+  const filteredMaterials = materials
+    .filter(material => {
+      const term = searchTerm.trim().toLowerCase();
+      const matchesSearch = !term || [
+        material.materialCode,
+        material.materialName,
+        material.category,
+        material.catNo,
+        material.supplierName,
+        material.supplierCode
+      ].some(value => String(value || '').toLowerCase().includes(term));
+      const matchesFlow = filterType === 'all' || material.materialFlow === filterType;
+      const matchesClass = classFilter === 'all' || material.class === classFilter;
+      return matchesSearch && matchesFlow && matchesClass;
+    })
+    .sort((a, b) => {
+      const column = COLUMNS.find(col => col.key === sort.key);
+      const left = a[sort.key] ?? '';
+      const right = b[sort.key] ?? '';
+      const result = column?.numeric
+        ? (parseFloat(left) || 0) - (parseFloat(right) || 0)
+        : String(left).localeCompare(String(right), undefined, { sensitivity: 'base' });
+      return sort.direction === 'asc' ? result : -result;
+    });
+
+  const handleSort = (key) => {
+    setSort(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
 
   const totalPages = Math.ceil(filteredMaterials.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -83,7 +125,7 @@ const ChangeMaster = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterType]);
+  }, [searchTerm, filterType, classFilter, sort]);
 
   const handleEdit = (material) => {
     setSelectedMaterial(material);
@@ -93,6 +135,7 @@ const ChangeMaster = () => {
       category: material.category || '',
       materialName: material.materialName || '',
       catNo: material.catNo || '',
+      hsnCode: material.hsnCode || '',
       supplierName: material.supplierName || '',
       supplierCode: material.supplierCode || '',
       cgst: material.cgst || '',
@@ -195,6 +238,7 @@ const ChangeMaster = () => {
       category: '',
       materialName: '',
       catNo: '',
+      hsnCode: '',
       supplierName: '',
       supplierCode: '',
       cgst: '',
@@ -211,7 +255,6 @@ const ChangeMaster = () => {
       sgst: false,
       igst: false
     });
-    setHsnError(false);
     setSupplierCodeError(false);
     setShowGstError(false);
   };
@@ -281,13 +324,10 @@ const ChangeMaster = () => {
           <div className="cm-main-panel">
             <div className="cm-filter-bar">
               <div className="cm-search-box">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
+                <Search size={20} />
                 <input
                   type="text"
-                  placeholder="Search by Material Code or Name"
+                  placeholder="Search by code, name, category, cat no or supplier"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -313,7 +353,25 @@ const ChangeMaster = () => {
                   FIN
                 </button>
               </div>
+
+              <select
+                className="cm-class-select"
+                value={classFilter}
+                onChange={(e) => setClassFilter(e.target.value)}
+                aria-label="Filter by class"
+              >
+                <option value="all">All classes</option>
+                {classOptions.map(cls => (
+                  <option key={cls} value={cls}>Class {cls}</option>
+                ))}
+              </select>
             </div>
+
+            {!loading && (
+              <div className="cm-result-count">
+                Showing {filteredMaterials.length === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, filteredMaterials.length)} of {filteredMaterials.length} materials
+              </div>
+            )}
 
             {loading ? (
               <div className="cm-loading">
@@ -332,52 +390,61 @@ const ChangeMaster = () => {
               </div>
             ) : (
               <>
-                <div className="cm-grid">
-                  {paginatedMaterials.map((material) => (
-                    <div key={material.id} className="cm-card">
-                      <div className="cm-card-header">
-                        <span className="cm-code-badge">{material.materialCode || 'N/A'}</span>
-                        <span className={`cm-flow-badge cm-flow-${material.materialFlow?.toLowerCase()}`}>
-                          {material.materialFlow}
-                        </span>
-                      </div>
-
-                      <div className="cm-card-body">
-                        <h3 className="cm-material-name">{material.materialName}</h3>
-
-                        <div className="cm-info-list">
-                          <div className="cm-info-row">
-                            <span className="cm-label">Category:</span>
-                            <span className="cm-value">{material.category || '-'}</span>
-                          </div>
-                          <div className="cm-info-row">
-                            <span className="cm-label">HSN Code:</span>
-                            <span className="cm-value">{material.catNo || '-'}</span>
-                          </div>
-                          <div className="cm-info-row">
-                            <span className="cm-label">Cost/Item:</span>
-                            <span className="cm-value cm-price">
-                              <IndianRupee size={15}/>
-                              {material.costPerItem || '0'}
+                <div className="cm-table-wrap">
+                  <table className="cm-table">
+                    <thead>
+                      <tr>
+                        {COLUMNS.map(column => {
+                          const active = sort.key === column.key;
+                          const SortIcon = !active ? ChevronsUpDown : sort.direction === 'asc' ? ArrowUp : ArrowDown;
+                          return (
+                            <th
+                              key={column.key}
+                              className={`cm-th-sortable ${active ? 'cm-th-active' : ''} ${column.align === 'right' ? 'cm-right' : ''}`}
+                              onClick={() => handleSort(column.key)}
+                              aria-sort={active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                            >
+                              <span>{column.label}</span>
+                              <SortIcon size={14} />
+                            </th>
+                          );
+                        })}
+                        <th className="cm-th-action"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedMaterials.map((material) => (
+                        <tr key={material.id} onClick={() => handleEdit(material)}>
+                          <td><span className="cm-code-pill">{material.materialCode || 'N/A'}</span></td>
+                          <td className="cm-td-name">{material.materialName}</td>
+                          <td>
+                            <span className={`cm-flow-badge cm-flow-${material.materialFlow?.toLowerCase()}`}>
+                              {material.materialFlow}
                             </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="cm-card-footer">
-                        <button
-                          className="cm-edit-btn"
-                          onClick={() => handleEdit(material)}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                          </svg>
-                          Edit Material
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                          </td>
+                          <td>{material.class || '-'}</td>
+                          <td>{material.category || '-'}</td>
+                          <td>{material.catNo || '-'}</td>
+                          <td>{material.supplierName || '-'}</td>
+                          <td>{material.unit || '-'}</td>
+                          <td className="cm-right cm-td-cost">
+                            <IndianRupee size={13} />
+                            {material.costPerItem || '0'}
+                          </td>
+                          <td className="cm-td-action">
+                            <button
+                              className="cm-row-edit-btn"
+                              onClick={(e) => { e.stopPropagation(); handleEdit(material); }}
+                              title="Edit material"
+                            >
+                              <Pencil size={15} />
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
                 <Pagination
@@ -458,6 +525,18 @@ const ChangeMaster = () => {
                           value={formData.catNo}
                           onChange={handleInputChange}
                           placeholder="Enter catalog number"
+                        />
+                      </div>
+
+                      <div className="cm-form-group">
+                        <label>HSN Code (used on invoices)</label>
+                        <input
+                          type="text"
+                          name="hsnCode"
+                          inputMode="numeric"
+                          value={formData.hsnCode}
+                          onChange={(e) => handleInputChange({ target: { name: 'hsnCode', value: e.target.value.replace(/\D/g, '').slice(0, 8) } })}
+                          placeholder="4 to 8 digits"
                         />
                       </div>
 

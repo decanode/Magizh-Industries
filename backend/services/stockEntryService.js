@@ -172,6 +172,9 @@ class StockEntryService {
     if (!doc.exists) {
       throw new Error('Stock entry not found');
     }
+    if (doc.data().refType) {
+      throw new Error('This entry was posted by a document (such as a sales order) and cannot be edited');
+    }
 
     await entryRef.update({
       ...updateData,
@@ -185,6 +188,9 @@ class StockEntryService {
 
     if (!doc.exists) {
       throw new Error('Stock entry not found');
+    }
+    if (doc.data().refType) {
+      throw new Error('This entry was posted by a document (such as a sales order) and cannot be deleted');
     }
 
     await entryRef.delete();

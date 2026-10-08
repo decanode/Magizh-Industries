@@ -23,6 +23,7 @@ const CreateMaster = () => {
     category: '',
     materialName: '',
     catNo: '',
+    hsnCode: '',
     supplierName: '',
     supplierCode: '',
     cgst: '',
@@ -266,6 +267,7 @@ const CreateMaster = () => {
       category: '',
       materialName: '',
       catNo: '',
+      hsnCode: '',
       supplierName: '',
       supplierCode: '',
       cgst: '',
@@ -374,6 +376,19 @@ const CreateMaster = () => {
                     value={formData.catNo}
                     onChange={handleChange}
                     placeholder="Enter catalog number"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="hsnCode">HSN Code (used on invoices)</label>
+                  <input
+                    type="text"
+                    id="hsnCode"
+                    name="hsnCode"
+                    inputMode="numeric"
+                    value={formData.hsnCode}
+                    onChange={(e) => handleChange({ target: { name: 'hsnCode', value: e.target.value.replace(/\D/g, '').slice(0, 8) } })}
+                    placeholder="4 to 8 digits"
                   />
                 </div>
 

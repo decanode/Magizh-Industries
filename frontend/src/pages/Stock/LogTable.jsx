@@ -25,16 +25,28 @@ const LogTable = () => {
   const fetchStockEntries = async () => {
     try {
       const token = sessionStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/stock/entries`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const [response, masterResponse] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/stock/entries`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/master`, { headers }).catch(() => null)
+      ]);
 
       if (response.ok) {
         const data = await response.json();
-        setStockEntries(data.data || []);
+
+        // Entries don't store the Cat No, so look it up from the material master (used for searching)
+        const catNoByCode = {};
+        if (masterResponse && masterResponse.ok) {
+          const masterData = await masterResponse.json();
+          (masterData.masters || []).forEach(master => {
+            catNoByCode[master.materialCode] = master.catNo || '';
+          });
+        }
+
+        setStockEntries((data.data || []).map(entry => ({ ...entry, catNo: catNoByCode[entry.materialCode] || '' })));
       } else {
         console.error('Failed to fetch stock entries');
       }
@@ -129,7 +141,8 @@ const LogTable = () => {
   const filteredEntries = stockEntries.filter(entry => {
     const matchesSearch =
       entry.materialCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.materialName?.toLowerCase().includes(searchTerm.toLowerCase());
+      entry.materialName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      entry.catNo?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesFilter = filterType === 'all' || entry.entryType === filterType;
 
@@ -186,7 +199,7 @@ const LogTable = () => {
               <Search className="log-search-icon" size={20} />
               <input
                 type="text"
-                placeholder="Search by material code or name..."
+                placeholder="Search by material code, name or cat no..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="log-search-input"

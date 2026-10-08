@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Package, LogOut, Warehouse, Users, CalendarCheck, LayoutDashboard, Receipt } from 'lucide-react';
+import { Home, Package, LogOut, Warehouse, Users, Database, ShoppingCart } from 'lucide-react';
 import '../styles/componentStyles/Sidebar.css';
 
 // Not every page passes isAdmin, so also read the role from the saved session.
@@ -18,11 +18,10 @@ const Sidebar = ({ isAdmin = false, isExpanded, onToggle }) => {
 
   const menuItems = [
     { name: 'Home', icon: Home, path: '/home' },
+    { name: 'Master Data', icon: Database, path: '/master-data' },
     { name: 'Stock', icon: Package, path: '/stock' },
-    { name: 'Employees', icon: Users, path: '/employees', adminOnly: true },
-    { name: 'Timesheet', icon: CalendarCheck, path: '/timesheet', adminOnly: true },
-    { name: 'Payslips', icon: Receipt, path: '/payslips', adminOnly: true },
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', adminOnly: true },
+    { name: 'Sales', icon: ShoppingCart, path: '/sales', adminOnly: true, children: ['/sales'] },
+    { name: 'Employee and Time', icon: Users, path: '/employee-time', adminOnly: true, children: ['/employees', '/timesheet', '/payslips', '/dashboard'] },
   ].filter((item) => !item.adminOnly || showAdminItems);
 
   const handleNavigation = (path) => {
@@ -61,7 +60,8 @@ const Sidebar = ({ isAdmin = false, isExpanded, onToggle }) => {
         <nav className="sidebar-nav">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname === item.path ||
+              (item.children || []).some((p) => location.pathname === p || location.pathname.startsWith(`${p}/`));
 
             return (
               <button
