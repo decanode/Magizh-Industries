@@ -48,12 +48,14 @@ const FinalData = () => {
         });
         
         const masterData = masterResponse.ok ? await masterResponse.json() : { data: [] };
-        const masters = masterData.data || [];
+        const masters = masterData.masters || masterData.data || [];
         
         // Create a map of materialCode to class
         const classMap = {};
+        const catNoMap = {};
         masters.forEach(master => {
           classMap[master.materialCode] = master.class;
+          catNoMap[master.materialCode] = master.catNo || '';
         });
         
         // Calculate balance for each material
@@ -68,6 +70,7 @@ const FinalData = () => {
               materialName: entry.materialName,
               unit: entry.unit,
               quantity: 0,
+              catNo: catNoMap[entry.materialCode] || '',
               class: classMap[entry.materialCode] || 'N/A'
             };
           }
@@ -99,7 +102,8 @@ const FinalData = () => {
   const filteredBalances = stockBalances.filter(balance => {
     const matchesSearch =
       balance.materialCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      balance.materialName?.toLowerCase().includes(searchTerm.toLowerCase());
+      balance.materialName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      balance.catNo?.toLowerCase().includes(searchTerm.toLowerCase());
 
     let matchesClass = true;
     if (filterClass !== 'all') {
@@ -221,7 +225,7 @@ const FinalData = () => {
                 <Search className="search-icon" size={20} />
                 <input
                   type="text"
-                  placeholder="Search by material code or name..."
+                  placeholder="Search by material code, name or cat no..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="search-input"

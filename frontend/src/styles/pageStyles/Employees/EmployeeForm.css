@@ -158,3 +158,27 @@
     padding: 1rem;
   }
 }
+
+/* Customer addresses */
+.party-address {
+  margin-bottom: 1rem;
+}
+
+.party-address-remove {
+  margin-top: 0.75rem;
+}
+
+.party-address-actions {
+  justify-content: flex-start;
+  margin-top: 0.5rem;
+}
+
+.em-grid label select {
+  width: 100%;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  background: #fff;
+}

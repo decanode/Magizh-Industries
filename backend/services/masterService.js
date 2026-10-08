@@ -134,6 +134,7 @@ class MasterService {
       category: materialData.category,
       materialName: materialData.materialName,
       catNo: materialData.catNo || '',
+      hsnCode: materialData.hsnCode || '',
       supplierName: materialData.supplierName || '',
       supplierCode: materialData.supplierCode || '',
       cgst: materialData.cgst || '',

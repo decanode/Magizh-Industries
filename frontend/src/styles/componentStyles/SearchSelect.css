@@ -1,0 +1,52 @@
+.ss-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.ss-input {
+  width: 100%;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.ss-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(91, 123, 154, 0.15);
+}
+
+.ss-list {
+  position: fixed;
+  z-index: 1000;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #cbd5e0;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.ss-option,
+.ss-empty {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.ss-option {
+  cursor: pointer;
+}
+
+.ss-option:hover {
+  background: rgba(91, 123, 154, 0.12);
+}
+
+.ss-empty {
+  color: #718096;
+}

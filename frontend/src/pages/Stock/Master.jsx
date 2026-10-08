@@ -8,16 +8,16 @@ const Master = ({ isAdmin = false }) => {
   const navigate = useNavigate();
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
-  // Handle back button navigation - always redirect to stock page
+  // Handle back button navigation - always redirect to master data page
   useEffect(() => {
     // Mark this page in history
     const currentState = { page: 'master', timestamp: Date.now() };
     window.history.replaceState(currentState, '', window.location.href);
     
     const handlePopState = (event) => {
-      // When back button is pressed, navigate to stock page instead
+      // When back button is pressed, navigate to master data page instead
       event.preventDefault();
-      navigate('/stock', { replace: true });
+      navigate('/master-data', { replace: true });
     };
 
     window.addEventListener('popstate', handlePopState);
